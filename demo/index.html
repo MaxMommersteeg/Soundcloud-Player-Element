@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <title>soundcloud-player demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+  <link rel="import" href="../soundcloud-player.html">
+
+  <custom-style>
+    <style is="custom-style" include="demo-pages-shared-styles">
+
+    </style>
+  </custom-style>
+</head>
+
+<body>
+  <div class="vertical-section-container centered">
+    <h3>Basic soundcloud-player demo</h3>
+    <p>
+      You need to provide your ClientId in order to stream tracks using the API. It is currently not possible to show a working
+      demo here, you should download it and use your own ClientId. ClientId for the Soundcloud SDK can be requested at following
+      url: https://soundcloud.com/you/apps
+    </p>
+    <p>Also make sure you follow the Soundcloud guidelines as stated on their website: https://developers.soundcloud.com/docs/api/guide#playing
+      <ul>
+        <li>Credit the uploader as the creator of the sound</li>
+        <li>Credit SoundCloud as the source by including one of the logos found here</li>
+        <li>Link to the SoundCloud URL containing the work</li>
+        <li>If the sound is private link to the profile of the creator</li>
+      </ul>
+    </p>
+    <demo-snippet>
+      <template>
+        <soundcloud-player client-id="YOUR_CLIENT_ID_HERE" track-url="https://soundcloud.com/skx_sk/skrillex-voltage-slushii-remix-free-download"></soundcloud-player>
+      </template>
+    </demo-snippet>
+  </div>
+</body>
+
+</html>

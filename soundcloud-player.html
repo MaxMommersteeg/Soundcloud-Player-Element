@@ -1,0 +1,213 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../paper-card/paper-card.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../iron-icons/av-icons.html">
+<link rel="import" href="soundcloud-sdk-wrapper.html">
+
+<!--
+`soundcloud-player` is a component for streaming Soundcloud tracks.
+
+Example:
+
+    <soundcloud-player client-id="YOUR_CLIENT_ID_HERE" track-url="https://soundcloud.com/skx_sk/skrillex-voltage-slushii-remix-free-download"></soundcloud-player>
+
+@group Soundcloud Elements
+@element soundcloud-player
+@demo demo/index.html
+-->
+
+<dom-module id="soundcloud-player">
+
+  <template>
+    <style>
+       :host {
+        display: block;
+      }
+
+      paper-card {
+        margin: 8px;
+        min-width: 250px;
+      }
+
+      .card-header {
+        background-color: orangered;
+        color: white;
+        font-size: 1.15em;
+        padding: 8px;
+        display: flex;
+      }
+
+      .card-header-title {
+        text-align: start;
+        width: 90%;
+      }
+
+      .card-header-icon {
+        text-align: end;
+        width: 10%;
+      }
+
+      .card-content {
+        background-color: white;
+        color: black;
+        padding: 8px;
+      }
+
+      .card-actions {
+        background-color: white;
+        color: black;
+        display: flex;
+        padding: 8px;
+        font-size: 0.70em;
+      }
+
+      .card-actions-start {
+        width: 50%;
+        text-align: start;
+      }
+
+      .card-actions-end {
+        width: 50%;
+        text-align: end;
+      }
+    </style>
+
+    <paper-card>
+      <div class="card-header">
+        <span>[[currentTrack.title]]</span>
+      </div>
+      <div class="card-content">
+        <div hidden$="[[hideDescription]]">
+          <p><b>Description</b></p>
+          <p>[[currentTrack.description]]</p>
+        </div>
+        <div hidden$="[[hideGenre]]">
+          <p><b>Genre</b></p>
+          <p>[[currentTrack.genre]]</p>
+        </div>
+      </div>
+      <div class="card-actions">
+        <paper-icon-button disabled$="[[isPlaying]]" raised on-tap="play" icon="av:play-arrow" title="Play"></paper-icon-button>
+        <paper-icon-button disabled$="[[!isPlaying]]" on-tap="pause" icon="av:pause" title="Pause"></paper-icon-button>
+      </div>
+    </paper-card>
+
+  </template>
+
+  <script>
+    class SoundcloudPlayer extends Polymer.Element {
+      static get is() { return "soundcloud-player"; }
+
+      // Configure properties
+      static get properties() {
+        return {
+          /**
+          * ClientId for using Soundcloud API.
+          */
+          clientId: {
+            type: String,
+            value: ''
+          },
+          /**
+          * Soundcloud track URL to stream.
+          */
+          trackUrl: {
+            type: String
+          },
+          /**
+          * Plays track directly after loading component.
+          */
+          autoPlay: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false
+          },
+          /**
+          * Hides genre field.
+          */
+          hideGenre: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false
+          },
+          /**
+          * Hides description field.
+          */
+          hideDescription: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false
+          },
+          /**
+          * Boolean indicating wether the player is currently playing the track.
+          */
+          isPlaying: {
+            type: Boolean,
+            value: false
+          },
+          /**
+          * Soundcloud Player object.
+          */
+          player: Object,
+          /**
+          * Trackinformation.
+          */
+          currentTrack: Object
+        };
+      }
+
+      /**
+      * Function gets executed when the component is fully loaded (ready).
+      */
+      ready() {
+        super.ready();
+
+        if (this.clientId === '') {
+          console.error('Provide a clientId');
+          return;
+        }
+
+        SC.initialize({
+          client_id: this.clientId
+        });
+
+        this.setTrack(this.trackUrl);
+      }
+
+      /**
+      * Function for preparing player to play track.
+      */
+      setTrack(trackUrl) {
+        SC.resolve(trackUrl).then(function (trackInfo) {
+          this.currentTrack = trackInfo;
+          SC.stream('tracks/' + this.currentTrack.id).then(function (player) {
+            this.player = player;
+            if (this.autoPlay) {
+              this.play();
+            }
+          }.bind(this));
+        }.bind(this)).catch(function (err) {
+          console.error(err);
+        });
+      }
+
+      /**
+      * Function for playing the currentTrack.
+      */
+      play() {
+        this.player.play();
+        this.isPlaying = true;
+      }
+
+      /**
+      * Function for pausing the currentTrack.
+      */
+      pause() {
+        this.player.pause();
+        this.isPlaying = false;
+      }
+    }
+    customElements.define(SoundcloudPlayer.is, SoundcloudPlayer);
+  </script>
+
+</dom-module>
