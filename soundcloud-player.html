@@ -76,7 +76,7 @@ Example:
       <div class="card-header">
         <span>[[currentTrack.title]]</span>
       </div>
-      <div class="card-content">
+      <div hidden$="[[hideInformation]]" class="card-content">
         <div hidden$="[[hideDescription]]">
           <p><b>Description</b></p>
           <p>[[currentTrack.description]]</p>
@@ -89,6 +89,7 @@ Example:
       <div class="card-actions">
         <paper-icon-button disabled$="[[isPlaying]]" raised on-tap="play" icon="av:play-arrow" title="Play"></paper-icon-button>
         <paper-icon-button disabled$="[[!isPlaying]]" on-tap="pause" icon="av:pause" title="Pause"></paper-icon-button>
+        <paper-icon-button on-tap="stop" icon="av:stop" title="Stop"></paper-icon-button>
       </div>
     </paper-card>
 
@@ -118,6 +119,14 @@ Example:
           * Plays track directly after loading component.
           */
           autoPlay: {
+            type: Boolean,
+            reflectToAttribute: true,
+            value: false
+          },
+          /**
+          * Hides all information fields: Genre and Description.
+          */
+          hideInformation: {
             type: Boolean,
             reflectToAttribute: true,
             value: false
@@ -204,6 +213,15 @@ Example:
       */
       pause() {
         this.player.pause();
+        this.isPlaying = false;
+      }
+
+      /**
+      * Function for stopping the currentTrack.
+      */
+      stop() {
+        this.player.seek(0);
+        this.pause();
         this.isPlaying = false;
       }
     }
