@@ -1,8 +1,16 @@
 <link rel="import" href="../polymer/polymer-element.html">
+
+<!-- Paper imports -->
 <link rel="import" href="../paper-card/paper-card.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-spinner/paper-spinner.html">
+
+<!-- Misc imports -->
 <link rel="import" href="../iron-icons/av-icons.html">
+
+<!-- Soundcloud imports -->
 <link rel="import" href="soundcloud-sdk-wrapper.html">
+
 
 <!--
 `soundcloud-player` is a component for streaming Soundcloud tracks.
@@ -62,12 +70,12 @@ Example:
       }
 
       .card-actions-start {
-        width: 50%;
+        width: 80%;
         text-align: start;
       }
 
       .card-actions-end {
-        width: 50%;
+        width: 20%;
         text-align: end;
       }
     </style>
@@ -87,9 +95,14 @@ Example:
         </div>
       </div>
       <div class="card-actions">
+        <div class="card-actions-start">
         <paper-icon-button disabled$="[[isPlaying]]" raised on-tap="play" icon="av:play-arrow" title="Play"></paper-icon-button>
         <paper-icon-button disabled$="[[!isPlaying]]" on-tap="pause" icon="av:pause" title="Pause"></paper-icon-button>
         <paper-icon-button on-tap="stop" icon="av:stop" title="Stop"></paper-icon-button>
+        </div>
+        <div class="card-actions-end">
+            <paper-spinner active$="[[isLoading]]"></paper-spinner>
+        </div>
       </div>
     </paper-card>
 
@@ -148,6 +161,14 @@ Example:
             value: false
           },
           /**
+          * Boolean idicating wether the track is loading/buffering.
+          */
+          isLoading: {
+            type: Boolean,
+            value: true,
+            notify: true
+          },
+          /**
           * Boolean indicating wether the player is currently playing the track.
           */
           isPlaying: {
@@ -180,6 +201,7 @@ Example:
           client_id: this.clientId
         });
 
+
         this.setTrack(this.trackUrl);
       }
 
@@ -191,6 +213,9 @@ Example:
           this.currentTrack = trackInfo;
           SC.stream('tracks/' + this.currentTrack.id).then(function (player) {
             this.player = player;
+            this.player.on('buffering_start', this._bufferingStart());
+            this.player.on('buffering_end', this._bufferingEnd());
+
             if (this.autoPlay) {
               this.play();
             }
@@ -223,6 +248,14 @@ Example:
         this.player.seek(0);
         this.pause();
         this.isPlaying = false;
+      }
+
+      _bufferingStart() {
+        this.isLoading = true;
+      }
+
+      _bufferingEnd() {
+        this.isLoading = false;
       }
     }
     customElements.define(SoundcloudPlayer.is, SoundcloudPlayer);
