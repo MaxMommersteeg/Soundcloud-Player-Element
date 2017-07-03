@@ -1,8 +1,15 @@
 <link rel="import" href="../polymer/polymer-element.html">
+
+<!-- Paper imports -->
 <link rel="import" href="../paper-card/paper-card.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
+
+<!-- Misc imports -->
 <link rel="import" href="../iron-icons/av-icons.html">
+
+<!-- Soundcloud imports -->
 <link rel="import" href="soundcloud-sdk-wrapper.html">
+
 
 <!--
 `soundcloud-player` is a component for streaming Soundcloud tracks.
@@ -37,12 +44,12 @@ Example:
         display: flex;
       }
 
-      .card-header-title {
+      .card-header-start {
         text-align: start;
         width: 90%;
       }
 
-      .card-header-icon {
+      .card-header-end {
         text-align: end;
         width: 10%;
       }
@@ -62,19 +69,25 @@ Example:
       }
 
       .card-actions-start {
-        width: 50%;
+        width: 80%;
         text-align: start;
       }
 
       .card-actions-end {
-        width: 50%;
+        width: 20%;
         text-align: end;
+        justify-content: center;
+        align-items: center;
+        display: flex;
       }
+
     </style>
 
     <paper-card>
       <div class="card-header">
-        <span>[[currentTrack.title]]</span>
+        <div class="card-header-start">
+          <span>[[currentTrack.title]]</span>
+        </div>
       </div>
       <div hidden$="[[hideInformation]]" class="card-content">
         <div hidden$="[[hideDescription]]">
@@ -87,9 +100,14 @@ Example:
         </div>
       </div>
       <div class="card-actions">
-        <paper-icon-button disabled$="[[isPlaying]]" raised on-tap="play" icon="av:play-arrow" title="Play"></paper-icon-button>
-        <paper-icon-button disabled$="[[!isPlaying]]" on-tap="pause" icon="av:pause" title="Pause"></paper-icon-button>
-        <paper-icon-button on-tap="stop" icon="av:stop" title="Stop"></paper-icon-button>
+        <div class="card-actions-start">
+          <paper-icon-button disabled$="[[isPlaying]]" raised on-tap="play" icon="av:play-arrow" title="Play"></paper-icon-button>
+          <paper-icon-button disabled$="[[!isPlaying]]" on-tap="pause" icon="av:pause" title="Pause"></paper-icon-button>
+          <paper-icon-button on-tap="stop" icon="av:stop" title="Stop"></paper-icon-button>
+        </div>
+        <div class="card-actions-end">
+          <span>[[currentTime]]</span>
+        </div>
       </div>
     </paper-card>
 
@@ -148,6 +166,14 @@ Example:
             value: false
           },
           /**
+          * Boolean idicating wether the track is loading/buffering.
+          */
+          isLoading: {
+            type: Boolean,
+            value: true,
+            notify: true
+          },
+          /**
           * Boolean indicating wether the player is currently playing the track.
           */
           isPlaying: {
@@ -161,7 +187,8 @@ Example:
           /**
           * Trackinformation.
           */
-          currentTrack: Object
+          currentTrack: Object,
+          currentTime: String
         };
       }
 
@@ -184,20 +211,49 @@ Example:
       }
 
       /**
-      * Function for preparing player to play track.
+      * Function for setting a track.
       */
       setTrack(trackUrl) {
         SC.resolve(trackUrl).then(function (trackInfo) {
           this.currentTrack = trackInfo;
-          SC.stream('tracks/' + this.currentTrack.id).then(function (player) {
-            this.player = player;
-            if (this.autoPlay) {
-              this.play();
-            }
-          }.bind(this));
+          this._trackSet();
         }.bind(this)).catch(function (err) {
           console.error(err);
         });
+      }
+
+      /**
+      * Function that indicates that the track has been set.
+      */
+      _trackSet() {
+        this._initializePlayer();
+      }
+
+      /**
+      * Function that initializes the player.
+      */
+      _initializePlayer() {
+        SC.stream('tracks/' + this.currentTrack.id).then(function (player) {
+          this.player = player;
+          this._playerInitialized();
+        }.bind(this));
+      }
+
+      /**
+      * Function that indicates that the players has been initialized.
+      */
+      _playerInitialized() {
+        // Setup event handlers
+        this.player.on('buffering_start', this._bufferingStart());
+        this.player.on('buffering_end', this._bufferingEnd());
+
+        // Timer for updating the currentTime on the UI.
+        setInterval(this._updateCurrentTime.bind(this), 450);
+
+        // Start with playing if autoPlay attribute was set
+        if (this.autoPlay) {
+          this.play();
+        }
       }
 
       /**
@@ -224,7 +280,38 @@ Example:
         this.pause();
         this.isPlaying = false;
       }
+
+      /**
+      * Gets called when buffering_start event was received.
+      */
+      _bufferingStart() {
+        this.isLoading = true;
+      }
+
+      /**
+      * Gets called when buffering_end event was received.
+      */
+      _bufferingEnd() {
+        this.isLoading = false;
+      }
+
+      /**
+      * Function for updating the current track time on the UI.
+      */
+      _updateCurrentTime() {
+        this.currentTime = this._millisecondsToMinutesAndSeconds(this.player.currentTime()) + " - " + this._millisecondsToMinutesAndSeconds(this.currentTrack.duration);
+      }
+
+      /**
+      * Function that converts milliseconds into: mm:ss format.
+      */
+      _millisecondsToMinutesAndSeconds(milliseconds) {
+        var minutes = Math.floor(milliseconds / 60000);
+        var seconds = ((milliseconds % 60000) / 1000).toFixed(0);
+        return minutes + ":" + (seconds < 10 ? '0' : '') + seconds;
+      }
     }
+
     customElements.define(SoundcloudPlayer.is, SoundcloudPlayer);
   </script>
 
