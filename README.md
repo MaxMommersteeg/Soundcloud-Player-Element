@@ -4,6 +4,10 @@
 
 Stream tracks from Soundcloud with this element.
 
+![alt text](http://imgur.com/Q8ZCLFZ "Simple soundcloud-player")
+
+![alt text](http://imgur.com/GPBzObD "Soundcloud-player")
+
 Note: a Soundcloud SDK ClientId is required in order to use this element.
 
 Make sure you follow the Soundcloud guidelines as stated on the [Soundcloud developer website](https://developers.soundcloud.com/docs/api/guide#playing).
