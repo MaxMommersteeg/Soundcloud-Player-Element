@@ -4,6 +4,8 @@
 
 Stream tracks from Soundcloud with this element.
 
+![Simple soundcloud-player](http://imgur.com/Q8ZCLFZ.png "Simple soundcloud-player")
+
 ## Usage
 Reference the element in the `head` section for your HTML-document:
 
@@ -28,8 +30,6 @@ Use bower to install the `soundcloud-player` element.
 ```bower
 bower install --save MaxMommersteeg/Soundcloud-Player-Element
 ```
-
-![Simple soundcloud-player](http://imgur.com/Q8ZCLFZ.png "Simple soundcloud-player")
 
 ## Notes
 A Soundcloud SDK ClientId is required in order to use this element.
