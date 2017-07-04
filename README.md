@@ -4,6 +4,12 @@
 
 Stream tracks from Soundcloud with this element.
 
+```html
+
+<soundcloud-player client-id="YOUR_SOUNDCLOUD_CLIENT_ID" track-url="https://soundcloud.com/trackurl"></soundcloud-player>
+
+```
+
 ![Simple soundcloud-player](http://imgur.com/Q8ZCLFZ.png "Simple soundcloud-player")
 
 Note: a Soundcloud SDK ClientId is required in order to use this element.
