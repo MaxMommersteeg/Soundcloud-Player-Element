@@ -3,6 +3,7 @@
 <!-- Paper imports -->
 <link rel="import" href="../paper-card/paper-card.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-slider/paper-slider.html">
 
 <!-- Misc imports -->
 <link rel="import" href="../iron-icons/av-icons.html">
@@ -61,26 +62,41 @@ Example:
       }
 
       .card-actions {
-        background-color: white;
-        color: black;
-        display: flex;
         padding: 8px;
-        font-size: 0.70em;
+        display: flex;
       }
 
-      .card-actions-start {
-        width: 80%;
+      .card-actions-buttons {
+        width: 100%;
         text-align: start;
       }
 
-      .card-actions-end {
-        width: 20%;
-        text-align: end;
+      .card-actions-currenttime {
+        font-size: 0.70em;
+        width: 10%;
+        text-align: center;
         justify-content: center;
         align-items: center;
         display: flex;
       }
 
+      .card-actions-progress {
+        font-size: 0.70em;
+        width: 80%;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        display: flex;
+      }
+
+      .card-actions-duration {
+        font-size: 0.70em;
+        width: 10%;
+        text-align: center;
+        justify-content: center;
+        align-items: center;
+        display: flex;
+      }
     </style>
 
     <paper-card>
@@ -100,14 +116,20 @@ Example:
         </div>
       </div>
       <div class="card-actions">
-        <div class="card-actions-start">
+        <div class="card-actions-buttons">
           <paper-icon-button disabled$="[[isPlaying]]" raised on-tap="play" icon="av:play-arrow" title="Play"></paper-icon-button>
           <paper-icon-button disabled$="[[!isPlaying]]" on-tap="pause" icon="av:pause" title="Pause"></paper-icon-button>
           <paper-icon-button on-tap="stop" icon="av:stop" title="Stop"></paper-icon-button>
         </div>
-        <div class="card-actions-end">
-          <span>[[currentTime]]</span>
-        </div>
+          <div class="card-actions-currenttime">
+            <span>[[currentTrackTime]]</span>
+          </div>
+          <div class="card-actions-progress">
+            <paper-slider disabled value$="[[currentTrackPercentage]]"></paper-slider>
+          </div>
+          <div class="card-actions-duration">
+            <span>[[currentTrackDuration]]</span>
+          </div>
       </div>
     </paper-card>
 
@@ -188,7 +210,9 @@ Example:
           * Trackinformation.
           */
           currentTrack: Object,
-          currentTime: String
+          currentTrackTime: String,
+          currentTrackDuration: String,
+          currentTrackPercentage: Number
         };
       }
 
@@ -216,17 +240,10 @@ Example:
       setTrack(trackUrl) {
         SC.resolve(trackUrl).then(function (trackInfo) {
           this.currentTrack = trackInfo;
-          this._trackSet();
+          this._initializePlayer();
         }.bind(this)).catch(function (err) {
           console.error(err);
         });
-      }
-
-      /**
-      * Function that indicates that the track has been set.
-      */
-      _trackSet() {
-        this._initializePlayer();
       }
 
       /**
@@ -244,11 +261,19 @@ Example:
       */
       _playerInitialized() {
         // Setup event handlers
-        this.player.on('buffering_start', this._bufferingStart());
-        this.player.on('buffering_end', this._bufferingEnd());
+        this.player.on('buffering_start', this._onBufferingStartEventReceived());
+        this.player.on('buffering_end', this._onBufferingEndEventReceived());
+        this.player.on('finish', this._onFinishEventReceived());
+
+        // Setup errornous event handlers
+        this.player.on('geo_blocked', this._onGeoBlockedEventReceived());
+        this.player.on('audio_error', this._onAudioErrorEventReceived());
+        this.player.on('no_streams', this._onNoStreamsEventReceived());
+        this.player.on('no_protocol', this._onNoProtocolEventReceived());
+        this.player.on('no_connection', this._onNoConnectionEventReceived());
 
         // Timer for updating the currentTime on the UI.
-        setInterval(this._updateCurrentTime.bind(this), 450);
+        setInterval(this._updateTime.bind(this), 450);
 
         // Start with playing if autoPlay attribute was set
         if (this.autoPlay) {
@@ -284,22 +309,47 @@ Example:
       /**
       * Gets called when buffering_start event was received.
       */
-      _bufferingStart() {
+      _onBufferingStartEventReceived() {
         this.isLoading = true;
       }
 
       /**
       * Gets called when buffering_end event was received.
       */
-      _bufferingEnd() {
+      _onBufferingEndEventReceived() {
         this.isLoading = false;
+      }
+
+      _onFinishEventReceived() {
+      }
+
+      _onGeoBlockedEventReceived() {
+      }
+
+      _onAudioErrorEventReceived() {
+      }
+
+      _onNoStreamsEventReceived() {
+      }
+
+      _onNoProtocolEventReceived() {
+      }
+
+      _onNoConnectionEventReceived() {
       }
 
       /**
       * Function for updating the current track time on the UI.
       */
-      _updateCurrentTime() {
-        this.currentTime = this._millisecondsToMinutesAndSeconds(this.player.currentTime()) + " - " + this._millisecondsToMinutesAndSeconds(this.currentTrack.duration);
+      _updateTime() {
+        var currentTime = this.player.currentTime();
+
+        // Calculate times 00:00 - 10:00
+        this.currentTrackTime = this._millisecondsToMinutesAndSeconds(currentTime);
+        this.currentTrackDuration = this._millisecondsToMinutesAndSeconds(this.currentTrack.duration);
+
+        // Calculate percentage 0 - 100
+        this.currentTrackPercentage = (currentTime / this.currentTrack.duration) * 100;
       }
 
       /**
