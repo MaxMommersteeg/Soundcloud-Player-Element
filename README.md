@@ -10,9 +10,14 @@ Stream tracks from Soundcloud with this element.
 Reference the element in the `head` section for your HTML-document:
 
 ```html
+<html>
   <head>
     <link rel="import" href="../Soundcloud-Player-Element/soundcloud-player.html">
   </head>
+  <body>
+    ...
+  </body>
+</html>
 ```
 
 Then render the element using following code:
