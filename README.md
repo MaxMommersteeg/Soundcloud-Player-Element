@@ -28,6 +28,11 @@ Then render the element using following code:
 <soundcloud-player client-id="YOUR_SOUNDCLOUD_CLIENT_ID" track-url="https://soundcloud.com/trackurl"></soundcloud-player>
 
 ```
+#### Properties
+| Property         | Type        | Description                               |
+| -----------------|-------------|-------------------------------------------|
+| client-id        | String      | Soundcloud ClientId                       |
+| track-url        | String      | URL to track to stream                    |
 
 #### Attributes
 | Attribute        | Type        | Description                               | Default     |
