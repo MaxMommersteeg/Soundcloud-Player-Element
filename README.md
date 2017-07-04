@@ -7,6 +7,7 @@ Stream tracks from Soundcloud with this element.
 ![Simple soundcloud-player](http://imgur.com/Q8ZCLFZ.png "Simple soundcloud-player")
 
 ## Usage
+
 Reference the element in the `head` section for your HTML-document:
 
 ```html
@@ -27,6 +28,13 @@ Then render the element using following code:
 <soundcloud-player client-id="YOUR_SOUNDCLOUD_CLIENT_ID" track-url="https://soundcloud.com/trackurl"></soundcloud-player>
 
 ```
+
+#### Attributes
+| Attribute        | Type        | Description                               | Default     |
+| -----------------|-------------|-------------------------------------------|-------------|
+| hide-information | Boolean     | Prevents card content from being rendered | false       |
+| hide-description | Boolean     | Hides description field                   | false       |   
+| hide-genre       | Boolean     | Hides genre field                         | false       |
 
 ## Installation
 
